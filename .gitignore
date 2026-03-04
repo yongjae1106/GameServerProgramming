@@ -47,6 +47,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.sinx
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
