@@ -40,7 +40,7 @@ public:
 	SESSION() { exit(-1); }
 	SESSION(int id, SOCKET so) : m_id(id), client(so)
 	{
-		recv_over.m_iotype = IO_RECV;
+		recv_over.m_iotype = IO_RECV; // IO_RECV로 리시브용 iotype을 생성해줘야함
 	}
 	~SESSION()
 	{
@@ -58,7 +58,7 @@ public:
 		o->m_buff[0] = num_bytes + 2;
 		o->m_buff[1] = sender_id;
 		memcpy(o->m_buff + 2, mess, num_bytes);
-		o->m_wsa.len = num_bytes + 2;
+		o->m_wsa.len = o->m_buff[0];
 		WSASend(client, &o->m_wsa, 1, 0, 0, &o->m_over, nullptr);
 	}
 };
@@ -118,7 +118,7 @@ int main()
 			CreateIoCompletionPort((HANDLE)client_socket, h_iocp, i, 0);
 			clients.try_emplace(i, i, client_socket);
 			clients[i].do_recv();
-			i++;
+			i++; // ACCEPT를 받았을 경우에만 증감식 적용
 			client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 			AcceptEx(server, client_socket, accept_over.m_buff, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, NULL, &accept_over.m_over);
 
@@ -145,12 +145,6 @@ int main()
 	}
 	SOCKADDR_IN cl_addr;
 	int addr_size = sizeof(cl_addr);
-	for (int i = 1; ; ++i) {
-		SOCKET client = WSAAccept(server,
-			reinterpret_cast<sockaddr*>(&cl_addr), &addr_size, NULL, NULL);
-		clients.try_emplace(i, i, client);
-		clients[i].do_recv();
-	}
 	closesocket(server);
 	WSACleanup();
 }

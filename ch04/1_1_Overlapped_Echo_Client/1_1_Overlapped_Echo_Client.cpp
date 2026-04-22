@@ -63,7 +63,6 @@ void CALLBACK send_callback(DWORD error, DWORD bytes_transferred, LPWSAOVERLAPPE
 		}
 	}
 	// size를 nullptr로 해주면 리턴사이즈할 수 없어 즉시받지 않고 callback으로만 받음
-
 }
 void send_to_server()
 {

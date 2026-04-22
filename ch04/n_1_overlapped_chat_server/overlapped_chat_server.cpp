@@ -13,13 +13,13 @@ class EXP_OVER {
 public:
 	WSAOVERLAPPED m_over;
 	long long m_id;
-	WSABUF	m_wsa[1];
-	char  m_buff[BUF_SIZE];
+	WSABUF	m_wsa[1];			// [0] m_buff 주소, [1] 길이
+	char  m_buff[BUF_SIZE];		// [길이] [id] [데이터]
 	EXP_OVER(long long client_id, int num_bytes, char* mess) : m_id(client_id)
 	{
-		ZeroMemory(&m_over, sizeof(m_over));
+		ZeroMemory(&m_over, sizeof(m_over)); // 오버랩드구조체 생성자에 zeromemory를 해줘야함, 아니면 쓰레기값이 들어가 오류 유발 가능
 		m_wsa[0].buf = m_buff;
-		m_wsa[0].len = num_bytes + 2;
+		m_wsa[0].len = num_bytes + 2;		// +2 헤더 포함
 		m_buff[0] = num_bytes + 2;
 		m_buff[1] = static_cast<char>(client_id);
 		memcpy(m_buff + 2, mess, num_bytes);
@@ -49,7 +49,7 @@ public:
 		c_wsabuf[0].len = BUF_SIZE;
 		DWORD recv_flag = 0;
 		memset(&c_over, 0, sizeof(c_over));
-		c_over.hEvent = reinterpret_cast<HANDLE>(m_id);
+		c_over.hEvent = reinterpret_cast<HANDLE>(m_id); // 클라이언트의 id를 저장하는 용도로 사용
 		WSARecv(client, c_wsabuf, 1, 0, &recv_flag, &c_over, recv_callback);
 	}
 	void do_send(int sender_id, int num_bytes, char* mess)
